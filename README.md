@@ -20,6 +20,6 @@ flying or landing.
 - Preview the base project [here](https://youtube.com/shorts/Q8XtgZZPKBc) 
 - Check out a more complex demo with 4 runways [here](https://youtube.com/shorts/lfpIuY2W5os)
 
-NOTE: All demo media have the planes moving at 2-4x regular speed.
+__NOTE__: All demo media have the planes moving at 2-4x regular speed.
 
 ![Project Demo](demo.GIF)
