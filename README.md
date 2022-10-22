@@ -16,4 +16,6 @@ The system must:
 flying or landing.
 - The traffic control zone is a circle of radius 10km (can be variable).
 
+[Preview the project here](project_demo.mp4)
+
 ![Project Demo](demo.GIF)
