@@ -17,7 +17,8 @@ flying or landing.
 - The traffic control zone is a circle of radius 10km (can be variable).
 
 ## Project Demos
-[Preview the project here](https://youtube.com/shorts/Q8XtgZZPKBc) and a more complex demo with 4 runways [here](https://youtube.com/shorts/lfpIuY2W5os)
+- Preview the base project [here](https://youtube.com/shorts/Q8XtgZZPKBc) 
+- Check out a more complex demo with 4 runways [here](https://youtube.com/shorts/lfpIuY2W5os)
 
 NOTE: All demo media have the planes moving at 2-4x regular speed.
 
