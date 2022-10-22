@@ -1,12 +1,14 @@
 import math
 import time
 
-from models import ATC
+from models import ATC, prep_for_landing
 from simulation import refresh_screen, pygame_init, new_plane_sprite, new_runway_sprite
 
+from statuses import *
 
 ZONE_RADIUS = 10000  # metres
-PLANE_SPEED = 140  # m/s
+CIRCLING_RADIUS = 1000  # metres
+PLANE_SPEED = 1400  # m/s
 NUM_RUNWAYS = 2
 RUNWAY_DIMENSIONS = (100, 500)  # metres
 RUNWAY_SPACING = 500  # metres
@@ -21,6 +23,7 @@ def main():
         RUNWAY_DIMENSIONS,
         RUNWAY_SPACING,
         ZONE_RADIUS,
+        CIRCLING_RADIUS,
         PLANE_SPEED,
         TRANSMIT_RATE,
         COLLISION,
@@ -53,6 +56,32 @@ def main():
             coords = (plane.x, plane.y)
             new_plane = new_plane_sprite(coords, screen)
             all_sprites.add(new_plane)
+
+            # check if runway is available
+            free_runways = atc.get_available_runway()
+
+            # check for planes that are waiting to land
+            if plane.status == FLYING:
+                if atc.status == AVAILABLE:
+                    prep_for_landing(free_runways, plane)
+                elif plane.close_to_runway_or_hold_point(atc.circling_points):
+                    plane.status = HOLDING
+                    atc.circling_points.append(plane.find_hold_point())
+                    
+            elif plane.status == HOLDING:
+                if atc.status == AVAILABLE:
+                    prep_for_landing(free_runways, plane)
+
+            elif plane.status == LANDING:
+                if math.hypot(plane.x - plane.target_point[0], plane.y - plane.target_point[1]) <= plane.runway.width:
+                    print("Plane has landed.")
+                    # TODO: move plane down runway
+                    atc.landed_planes.append(plane)
+                    print("ATC Landed Planes:", len(atc.landed_planes))
+                    atc.planes.remove(plane)
+                    print("ATC Planes Remaining:", len(atc.planes))
+                    plane.runway.status = AVAILABLE
+                    plane.runway = None
 
         for runway in atc.runways:
             # add each to the drawing library
