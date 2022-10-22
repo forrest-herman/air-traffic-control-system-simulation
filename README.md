@@ -16,6 +16,9 @@ The system must:
 flying or landing.
 - The traffic control zone is a circle of radius 10km (can be variable).
 
+## Further Project Documentation
+View a comprehensive document detailing the project scope, goals, and considerations [here](atc_documentation.pdf).
+
 ## Project Demos
 - Preview the base project [here](https://youtube.com/shorts/Q8XtgZZPKBc) 
 - Check out a more complex demo with 4 runways [here](https://youtube.com/shorts/lfpIuY2W5os)
