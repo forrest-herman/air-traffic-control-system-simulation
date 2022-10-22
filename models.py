@@ -70,16 +70,16 @@ class Runway:
 
 class ATC:
     def __init__(self, 
-        num_runways, 
-        runway_dimensions, 
-        runway_spacing,
-        zone_radius, 
-        plane_speed, 
-        transmit_rate_hz,
-        collision_distance, 
-        max_planes=None, 
-        name=""
-    ):
+                 num_runways,
+                 runway_dimensions,
+                 runway_spacing,
+                 zone_radius,
+                 plane_speed,
+                 transmit_rate_hz,
+                 collision_distance,
+                 max_planes=None,
+                 name=""
+                 ):
         self.zone_radius = zone_radius
         self.plane_speed = plane_speed
         self.time_delta = 1 / transmit_rate_hz
@@ -103,8 +103,9 @@ class ATC:
         width = dimensions[0]
         height = dimensions[1]
         
-        span = num_runways * (spacing + width)
-        starting_point = -span / 2
+        span = (num_runways - 1) * spacing + num_runways * width
+        print("Span: ", span)
+        starting_point = -span / 2 + width / 2
 
         # create the runways with the correct spacing
         for i in range(num_runways):

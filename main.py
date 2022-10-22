@@ -17,15 +17,14 @@ MAX_PLANES = 10  # (optional) maximum number of planes allowed in the zone
 
 def main():
     atc = ATC(
-        NUM_RUNWAYS, 
-        RUNWAY_DIMENSIONS, 
+        NUM_RUNWAYS,
+        RUNWAY_DIMENSIONS,
         RUNWAY_SPACING,
-        ZONE_RADIUS, 
-        PLANE_SPEED, 
+        ZONE_RADIUS,
+        PLANE_SPEED,
         TRANSMIT_RATE,
-        COLLISION, 
+        COLLISION,
         name="SpaceRyde")  # MAX_PLANES
-
 
     atc.spawn_plane()
 
@@ -61,12 +60,10 @@ def main():
             new_plane = new_runway_sprite(coords, screen)
             all_sprites.add(new_plane)
 
-
         # visual simulation
         add_plane, running = refresh_screen(screen, all_sprites, ZONE_RADIUS)
 
-        time.sleep(time_delta) # community at given rate
-
+        time.sleep(time_delta)  # community at given rate
 
 
 if __name__ == '__main__':

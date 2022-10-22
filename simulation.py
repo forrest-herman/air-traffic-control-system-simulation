@@ -41,7 +41,7 @@ def pygame_init(size):
     pygame.init()
 
     # Set up the drawing window screen
-    size = pixel_convert(size)*2 + 200 # give boarder around traffic control zone
+    size = pixel_convert(size)*2 + 200  # give boarder around traffic control zone
     screen = pygame.display.set_mode([size, size])
 
     # Create group to hold all plane sprites
@@ -70,7 +70,7 @@ def new_runway_sprite(coords, screen):
     x = x + w/2
     y = -y + h/2
 
-    new_plane = RunwaySprite((120,120,120), x, y)
+    new_plane = RunwaySprite((120, 120, 120), x, y)
     return new_plane
 
 
@@ -80,22 +80,20 @@ def refresh_screen(screen, all_sprites, size):
     # Fill the background with blue
     screen.fill((100, 150, 255))
 
-    zone_size = pixel_convert(size) # get the size of the traffic control zone
+    zone_size = pixel_convert(size)  # get the size of the traffic control zone
     w, h = screen.get_size()
 
-    # draw the traffic control zone and runways
+    # draw the traffic control zone
     pygame.draw.circle(screen, (180, 220, 180), (w/2, h/2), zone_size, 0)
-    pygame.draw.rect(screen, (120,120,120), (w/2, w/2, 10, 50), 0)
 
     # scale bars grid
-    grey = 170
     grid_color = (100, 150, 255)
     for i in range(0, 23):
         pygame.draw.rect(screen, grid_color, (0, 50*i+50, w, 1), 0)
         pygame.draw.rect(screen, grid_color, (50*i+50, 0, 1, h), 0)
 
     myfont = pygame.font.SysFont("monospace", 15)
-    label = myfont.render("Traffic Control Zone, Grid Scale 1 km", 1, (0,0,0))
+    label = myfont.render("Traffic Control Zone, Grid Scale 1 km", 1, (0, 0, 0))
     screen.blit(label, (25, h - 25))
 
     # Draw all sprites
@@ -109,9 +107,9 @@ def refresh_screen(screen, all_sprites, size):
     # Did the user click the window close button?
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
-            return False, False # new plane, running
+            return False, False  # new plane, running
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_SPACE:
-                return True, True # new plane, running
+                return True, True  # new plane, running
 
-    return False, True # new plane, running
+    return False, True  # new plane, running
