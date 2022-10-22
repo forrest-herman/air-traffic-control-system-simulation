@@ -17,7 +17,7 @@ flying or landing.
 - The traffic control zone is a circle of radius 10km (can be variable).
 
 ## Further Project Documentation
-View a comprehensive document detailing the project scope, goals, and considerations [here](atc_documentation.pdf).
+View a comprehensive document detailing the project scope, goals, and considerations [here](docs/atc_documentation.pdf).
 
 ## Project Demos
 - Preview the base project [here](https://youtube.com/shorts/Q8XtgZZPKBc) 
@@ -25,4 +25,4 @@ View a comprehensive document detailing the project scope, goals, and considerat
 
 __NOTE__: All demo media have the planes moving at 2-4x regular speed.
 
-![Project Demo](demo.GIF)
+![Project Demo](docs/demo.GIF)
