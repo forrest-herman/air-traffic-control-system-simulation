@@ -72,16 +72,30 @@ def main():
                     
             elif plane.status == HOLDING:
                 if atc.status == AVAILABLE:
+                    atc.circling_points.remove(plane.target_point)
                     prep_for_landing(free_runways, plane)
 
-            elif plane.status == LANDING:
+            if plane.status == LANDING:
                 if math.hypot(plane.x - plane.target_point[0], plane.y - plane.target_point[1]) <= plane.runway.width * 1.5:
-                    print("Plane has landed.")
-                    # TODO: move plane down runway
+                    plane.status = RUNWAY
+                    print("Plane is on the runway")
+
+            if plane.status == RUNWAY:
+                # check the plane's direction of approach
+                if plane.angle > 0 and plane.angle < math.pi:
+                    # plane is approaching from the south
+                    plane.set_path_to_runway(plane.runway, True)
+                    condition = plane.y >= (plane.runway.length/2)
+                else:
+                    # plane is approaching from the north
+                    plane.set_path_to_runway(plane.runway, False)
+                    condition = plane.y <= -(plane.runway.length/2)
+
+                if condition:
                     atc.landed_planes.append(plane)
-                    print("ATC Landed Planes:", len(atc.landed_planes))
+                    print(f"ATC Landed {len(atc.landed_planes)} Planes")
                     atc.planes.remove(plane)
-                    print("ATC Planes Remaining:", len(atc.planes))
+                    print(f"{len(atc.planes)} Planes Remaining")
                     plane.runway.status = AVAILABLE
                     plane.runway = None
 
@@ -95,7 +109,7 @@ def main():
         all_sprites = (plane_sprites, runway_sprites)
         add_plane, running = refresh_screen(screen, all_sprites, ZONE_RADIUS)
 
-        time.sleep(time_delta)  # community at given rate
+        time.sleep(time_delta)  # communicate at given rate
 
 
 if __name__ == '__main__':

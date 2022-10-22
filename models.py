@@ -53,7 +53,7 @@ class Plane:
         # check if another plane is circling between plane and the runway
         for point in occupied_pts:
             distance_to_point = math.hypot(self.x - point[0], self.y - point[1])
-            if distance_to_point <= 3 * self.circling_radius:
+            if distance_to_point <= 4 * self.circling_radius:
                 print("Plane is too close to another plane")
                 return True
         if math.hypot(self.x, self.y) <= 4 * self.circling_radius:
@@ -61,22 +61,18 @@ class Plane:
             return True
         return False
 
-    def set_path_to_runway(self, runway, from_the_top):
-        print("Plane is landing")
-        if(from_the_top):
+    def set_path_to_runway(self, runway, target_top):
+        if(target_top):
             coords = runway.get_north_coords()
         else:
             coords = runway.get_south_coords()
-        print("coords", coords)
         self.runway = runway
         self.update_path_to_point(coords)
 
     def update_path_to_point(self, point):
         self.target_point = point
         adjusted_coords = (point[0] - self.x, point[1] - self.y)
-        print("old angle", self.angle)
         self.angle = math.atan2(adjusted_coords[1], adjusted_coords[0])
-        print("new angle", self.angle)
 
 
 class Runway:
@@ -138,13 +134,11 @@ class ATC:
         height = dimensions[1]
         
         span = (num_runways - 1) * spacing + num_runways * width
-        print("Span: ", span)
         starting_point = -span / 2 + width / 2
 
         # create the runways with the correct spacing
         for i in range(num_runways):
             coords = (starting_point+i*(spacing+width), 0)
-            print("Runway coords: ", coords)
             runway = Runway(i, width, height, coords)
             self.runways.append(runway)
 
@@ -164,7 +158,6 @@ class ATC:
             time_delta = self.time_delta
         for plane in self.planes:
             plane.move(time_delta)
-            # print(plane.x, plane.y, plane.get_angle_in_degrees())
 
     def spawn_plane(self):
         if self.max_planes is None:
@@ -172,13 +165,10 @@ class ATC:
         elif len(self.planes) >= self.max_planes:
             return False
 
-        print("Attempting to spawn plane...")
         new_plane = create_plane(self.zone_radius, self.plane_speed, self.circling_radius)
 
         # check new plane coords don't intersect with any existing planes
         for i, plane in enumerate(self.planes):
-            print(f"Plane {i}: ", plane.x, plane.y)
-            print("Plane new: ", new_plane.x, new_plane.y)
             if check_collision(plane, new_plane, self.collision_distance):
                 del new_plane
                 print("Collision detected. Plane not spawned.")
@@ -193,7 +183,7 @@ class ATC:
                 print("Retrying...")
                 self.spawn_plane()
 
-        print("Plane spawned.\n")
+        print("Plane spawned.")
         self.planes.append(new_plane)
         return True
 
@@ -255,11 +245,9 @@ def prep_for_landing(free_runways, plane):
     if from_the_left:
         # choose innermost available left runway
         runway = free_runways[lenght//2-1]
-        print(lenght//2-1)
     else:
         # choose innermost available right runway
         runway = free_runways[lenght//2]
-        print(lenght//2)
 
     # set the plane to land
     runway.status = BUSY
