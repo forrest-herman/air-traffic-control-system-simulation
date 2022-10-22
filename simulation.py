@@ -101,8 +101,6 @@ def refresh_screen(screen, all_sprites, size):
     # Draw all sprites
     runway_sprites.draw(screen)
     plane_sprites.draw(screen)
-    # for entity in plane_sprites:
-    #     screen.blit(entity.image, entity.rect)
 
     # Update the display
     pygame.display.flip()
@@ -113,6 +111,7 @@ def refresh_screen(screen, all_sprites, size):
             return False, False  # new plane, running
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_SPACE:
+                # spawn a new plane
                 return True, True  # new plane, running
 
     return False, True  # new plane, running

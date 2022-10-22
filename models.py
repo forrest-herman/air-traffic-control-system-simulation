@@ -23,8 +23,8 @@ class Plane:
     def get_angle_in_degrees(self):
         return math.degrees(self.angle)
 
-    def move(self, td):
-        # td = time_delta
+    def move(self, dt):
+        # dt = time_delta
         if (self.status == HOLDING):
             # how many rad/sec to turn
             angular_velocity = self.speed / self.circling_radius
@@ -32,14 +32,14 @@ class Plane:
             # get angle to target point
             adjusted_coords = (self.x - self.target_point[0], self.y - self.target_point[1])
             angle_to_target = math.atan2(
-                adjusted_coords[1], adjusted_coords[0]) + angular_velocity * td
+                adjusted_coords[1], adjusted_coords[0]) + angular_velocity * dt
 
             # calculate next position
             self.x = self.circling_radius * math.cos(angle_to_target) + self.target_point[0]
             self.y = self.circling_radius * math.sin(angle_to_target) + self.target_point[1]
         else:
-            self.x += self.speed * math.cos(self.angle) * td
-            self.y += self.speed * math.sin(self.angle) * td
+            self.x += self.speed * math.cos(self.angle) * dt
+            self.y += self.speed * math.sin(self.angle) * dt
 
     def find_hold_point(self):
         # find the point to circle around
@@ -58,6 +58,7 @@ class Plane:
                 print("Plane is too close to another plane")
                 return True
         if math.hypot(self.x, self.y) <= 4 * self.circling_radius:
+            # this would need to be improved if the number of runways is increased
             print("Plane is too close to a runway")
             return True
         return False
@@ -164,6 +165,7 @@ class ATC:
         if self.max_planes is None:
             pass  # ignore this check
         elif len(self.planes) >= self.max_planes:
+            print("Max planes reached")
             return False
 
         new_plane = create_plane(self.zone_radius, self.plane_speed, self.circling_radius)
@@ -182,16 +184,11 @@ class ATC:
                     return False
 
                 print("Retrying...")
-                self.spawn_plane()
+                return self.spawn_plane()
 
         print("Plane spawned.")
         self.planes.append(new_plane)
         return True
-
-    def set_holding_point(self, plane):
-        # find a suitable point to hold the plane in
-        point = (100, 100)
-        plane.update_path_to_point(point)
 
 
 # helper function for ATC class

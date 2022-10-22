@@ -14,10 +14,11 @@ RUNWAY_DIMENSIONS = (100, 500)  # metres
 RUNWAY_SPACING = 500  # metres
 TRANSMIT_RATE = 10  # Hz
 COLLISION = 100  # metres
-MAX_PLANES = 10  # (optional) maximum number of planes allowed in the zone
+MAX_PLANES = 50  # (optional) maximum number of planes allowed in the zone
 
 
 def main():
+    # create the ATC system
     atc = ATC(
         NUM_RUNWAYS,
         RUNWAY_DIMENSIONS,
@@ -27,8 +28,10 @@ def main():
         PLANE_SPEED,
         TRANSMIT_RATE,
         COLLISION,
-        name="SpaceRyde")  # MAX_PLANES
+        max_planes=MAX_PLANES,
+        name="Forrest Herman's ATC System")
 
+    # spawn plane #1 (this is optional)
     atc.spawn_plane()
 
     # prepare pygame
@@ -44,22 +47,25 @@ def main():
 
     while(running):
         if add_plane:
+            # this triggers if the spacebar is pressed
             atc.spawn_plane()
             add_plane = False
 
         # move the planes at their corresponding speed at their current angle
         atc.update_planes()
 
+        # clear old sprites
         plane_sprites.empty()
         runway_sprites.empty()
 
+        # loop through all planes and check logic
         for plane in atc.planes:
             # add each to the drawing library
             coords = (plane.x, plane.y)
             new_plane = new_plane_sprite(coords, screen)
             plane_sprites.add(new_plane)
 
-            # check if runway is available
+            # check what runways are available
             free_runways = atc.get_available_runway()
 
             # check for planes that are waiting to land
@@ -84,14 +90,17 @@ def main():
                 # check the plane's direction of approach
                 if plane.angle > 0 and plane.angle < math.pi:
                     # plane is approaching from the south
+                    # set tartget to the north end of the runway
                     plane.set_path_to_runway(plane.runway, True)
                     condition = plane.y >= (plane.runway.length/2)
                 else:
                     # plane is approaching from the north
+                    # set target to the south end of the runway
                     plane.set_path_to_runway(plane.runway, False)
                     condition = plane.y <= -(plane.runway.length/2)
 
                 if condition:
+                    # plane has reached the end of the runway
                     atc.landed_planes.append(plane)
                     print(f"ATC Landed {len(atc.landed_planes)} Planes")
                     atc.planes.remove(plane)
@@ -99,16 +108,17 @@ def main():
                     plane.runway = None
 
         for runway in atc.runways:
-            # add each to the drawing library
+            # add each runway to the drawing library
             coords = (runway.x, runway.y)
             new_runway = new_runway_sprite(coords, screen)
             runway_sprites.add(new_runway)
 
         # visual simulation
         all_sprites = (plane_sprites, runway_sprites)
+        # spawn a plane by pressing the space key
         add_plane, running = refresh_screen(screen, all_sprites, ZONE_RADIUS)
 
-        time.sleep(time_delta)  # communicate at given rate
+        time.sleep(time_delta)  # communicate with ATC at given rate
 
 
 if __name__ == '__main__':
