@@ -33,6 +33,7 @@ def main():
 
     # prepare pygame
     screen, all_sprites = pygame_init(ZONE_RADIUS)
+    plane_sprites, runway_sprites = all_sprites
 
     # loop every 0.1 seconds (10 Hz)
     time_delta = 1 / TRANSMIT_RATE
@@ -49,13 +50,14 @@ def main():
         # move the planes at their corresponding speed at their current angle
         atc.update_planes()
 
-        all_sprites.empty()
+        plane_sprites.empty()
+        runway_sprites.empty()
 
         for plane in atc.planes:
             # add each to the drawing library
             coords = (plane.x, plane.y)
             new_plane = new_plane_sprite(coords, screen)
-            all_sprites.add(new_plane)
+            plane_sprites.add(new_plane)
 
             # check if runway is available
             free_runways = atc.get_available_runway()
@@ -73,7 +75,7 @@ def main():
                     prep_for_landing(free_runways, plane)
 
             elif plane.status == LANDING:
-                if math.hypot(plane.x - plane.target_point[0], plane.y - plane.target_point[1]) <= plane.runway.width:
+                if math.hypot(plane.x - plane.target_point[0], plane.y - plane.target_point[1]) <= plane.runway.width * 1.5:
                     print("Plane has landed.")
                     # TODO: move plane down runway
                     atc.landed_planes.append(plane)
@@ -86,10 +88,11 @@ def main():
         for runway in atc.runways:
             # add each to the drawing library
             coords = (runway.x, runway.y)
-            new_plane = new_runway_sprite(coords, screen)
-            all_sprites.add(new_plane)
+            new_runway = new_runway_sprite(coords, screen)
+            runway_sprites.add(new_runway)
 
         # visual simulation
+        all_sprites = (plane_sprites, runway_sprites)
         add_plane, running = refresh_screen(screen, all_sprites, ZONE_RADIUS)
 
         time.sleep(time_delta)  # community at given rate

@@ -39,14 +39,16 @@ class RunwaySprite(pygame.sprite.Sprite):
 
 def pygame_init(size):
     pygame.init()
+    pygame.display.set_caption('ATC System Simulation')
 
     # Set up the drawing window screen
     size = pixel_convert(size)*2 + 200  # give boarder around traffic control zone
     screen = pygame.display.set_mode([size, size])
 
     # Create group to hold all plane sprites
-    all_sprites = pygame.sprite.Group()
-
+    plane_sprites = pygame.sprite.Group()
+    runway_sprites = pygame.sprite.Group()
+    all_sprites = (plane_sprites, runway_sprites)
     return screen, all_sprites
 
 
@@ -75,7 +77,7 @@ def new_runway_sprite(coords, screen):
 
 
 def refresh_screen(screen, all_sprites, size):
-    all_sprites.sprites()
+    plane_sprites, runway_sprites = all_sprites
 
     # Fill the background with blue
     screen.fill((100, 150, 255))
@@ -97,8 +99,9 @@ def refresh_screen(screen, all_sprites, size):
     screen.blit(label, (25, h - 25))
 
     # Draw all sprites
-    all_sprites.draw(screen)
-    # for entity in all_sprites:
+    runway_sprites.draw(screen)
+    plane_sprites.draw(screen)
+    # for entity in plane_sprites:
     #     screen.blit(entity.image, entity.rect)
 
     # Update the display

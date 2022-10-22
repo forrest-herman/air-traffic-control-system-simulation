@@ -61,9 +61,12 @@ class Plane:
             return True
         return False
 
-    def set_path_to_runway(self, runway):
+    def set_path_to_runway(self, runway, from_the_top):
         print("Plane is landing")
-        coords = runway.get_north_coords()
+        if(from_the_top):
+            coords = runway.get_north_coords()
+        else:
+            coords = runway.get_south_coords()
         print("coords", coords)
         self.runway = runway
         self.update_path_to_point(coords)
@@ -233,10 +236,44 @@ def check_collision(plane1, plane2, collision_distance):
 
 
 def prep_for_landing(free_runways, plane):
+    # find closest runway
+    quadrant = get_quadrant(plane)
+    if quadrant == 1:
+        from_the_top = True
+        from_the_left = False
+    elif quadrant == 2:
+        from_the_top = True
+        from_the_left = True
+    elif quadrant == 3:
+        from_the_top = False
+        from_the_left = True
+    elif quadrant == 4:
+        from_the_top = False
+        from_the_left = False
+
+    lenght = len(free_runways)
+    if from_the_left:
+        # choose innermost available left runway
+        runway = free_runways[lenght//2-1]
+        print(lenght//2-1)
+    else:
+        # choose innermost available right runway
+        runway = free_runways[lenght//2]
+        print(lenght//2)
+
     # set the plane to land
-    # TODO: find closest runway
-    runway = free_runways[0]
     runway.status = BUSY
     plane.status = LANDING
     # TODO: set target point to landing strip top or bottom
-    plane.set_path_to_runway(runway)
+    plane.set_path_to_runway(runway, from_the_top)
+
+
+def get_quadrant(plane):
+    if plane.x > 0 and plane.y > 0:
+        return 1
+    elif plane.x < 0 and plane.y > 0:
+        return 2
+    elif plane.x < 0 and plane.y < 0:
+        return 3
+    elif plane.x > 0 and plane.y < 0:
+        return 4
