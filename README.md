@@ -17,7 +17,7 @@ flying or landing.
 - The traffic control zone is a circle of radius 10km (can be variable).
 
 ## Further Project Documentation
-View a comprehensive document detailing the project scope, goals, and considerations [here](docs/atc_documentation.pdf).
+View a comprehensive document detailing the project scope, goals, and considerations [here](docs/Air_Traffic_Control_System_Documentation.pdf).
 
 ## Project Demos
 - Preview the base project [here](https://youtube.com/shorts/Q8XtgZZPKBc) 
