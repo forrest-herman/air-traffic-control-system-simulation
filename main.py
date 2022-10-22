@@ -8,7 +8,7 @@ from statuses import *
 
 ZONE_RADIUS = 10000  # metres
 CIRCLING_RADIUS = 1000  # metres
-PLANE_SPEED = 1400  # m/s
+PLANE_SPEED = 140  # m/s
 NUM_RUNWAYS = 2
 RUNWAY_DIMENSIONS = (100, 500)  # metres
 RUNWAY_SPACING = 500  # metres
