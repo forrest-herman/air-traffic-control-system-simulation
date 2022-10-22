@@ -95,7 +95,6 @@ def main():
                     atc.landed_planes.append(plane)
                     print(f"ATC Landed {len(atc.landed_planes)} Planes")
                     atc.planes.remove(plane)
-                    print(f"{len(atc.planes)} Planes Remaining")
                     plane.runway.status = AVAILABLE
                     plane.runway = None
 

@@ -31,7 +31,8 @@ class Plane:
 
             # get angle to target point
             adjusted_coords = (self.x - self.target_point[0], self.y - self.target_point[1])
-            angle_to_target = math.atan2(adjusted_coords[1], adjusted_coords[0]) + angular_velocity * td
+            angle_to_target = math.atan2(
+                adjusted_coords[1], adjusted_coords[0]) + angular_velocity * td
 
             # calculate next position
             self.x = self.circling_radius * math.cos(angle_to_target) + self.target_point[0]
@@ -42,7 +43,7 @@ class Plane:
 
     def find_hold_point(self):
         # find the point to circle around
-        angle = self.angle + math.pi # get outward facing angle
+        angle = self.angle + math.pi  # get outward facing angle
         self.target_point = (
             self.x - self.circling_radius * math.cos(angle),
             self.y - self.circling_radius * math.sin(angle)
@@ -95,7 +96,7 @@ class Runway:
 
 
 class ATC:
-    def __init__(self, 
+    def __init__(self,
                  num_runways,
                  runway_dimensions,
                  runway_spacing,
@@ -132,7 +133,7 @@ class ATC:
     def place_runways(self, num_runways, dimensions, spacing):
         width = dimensions[0]
         height = dimensions[1]
-        
+
         span = (num_runways - 1) * spacing + num_runways * width
         starting_point = -span / 2 + width / 2
 
@@ -166,13 +167,13 @@ class ATC:
             return False
 
         new_plane = create_plane(self.zone_radius, self.plane_speed, self.circling_radius)
+        distance_factor = self.collision_distance * 2
 
         # check new plane coords don't intersect with any existing planes
-        for i, plane in enumerate(self.planes):
-            if check_collision(plane, new_plane, self.collision_distance):
+        for plane in self.planes:
+            if check_collision(plane, new_plane, distance_factor):
                 del new_plane
                 print("Collision detected. Plane not spawned.")
-                # TODO: maybe track the angle used and blacklist it?
 
                 # TODO: track attempts?
                 self.spawn_attemps += 1  # count number of unalowable positions
@@ -198,12 +199,10 @@ def create_plane(zone_radius, speed, circling_radius):
     # spawn plan at a random location on the edge of the zone
     rand_angle = random.uniform(0, 2*math.pi)  # get an angle inside the circle zone
 
-    # rand_angle = math.pi/2  # temp
-
     # create coordinates along perimeter of circle
     current_coords = (zone_radius*math.cos(rand_angle), zone_radius*math.sin(rand_angle))
     # create plane
-    new_plane = Plane(current_coords, speed, circling_radius)  
+    new_plane = Plane(current_coords, speed, circling_radius)
     return new_plane
 
 

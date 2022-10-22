@@ -94,9 +94,9 @@ def refresh_screen(screen, all_sprites, size):
         pygame.draw.rect(screen, grid_color, (0, 50*i+50, w, 1), 0)
         pygame.draw.rect(screen, grid_color, (50*i+50, 0, 1, h), 0)
 
-    myfont = pygame.font.SysFont("monospace", 15)
+    myfont = pygame.font.SysFont("monospace", 18)
     label = myfont.render("Traffic Control Zone, Grid Scale 1 km", 1, (0, 0, 0))
-    screen.blit(label, (25, h - 25))
+    screen.blit(label, (25, h - 40))
 
     # Draw all sprites
     runway_sprites.draw(screen)
