@@ -4,7 +4,7 @@ import time
 from models import ATC, prep_for_landing
 from simulation import refresh_screen, pygame_init, new_plane_sprite, new_runway_sprite
 
-from statuses import *
+from statuses import *  # import all plane and atc statuses
 
 ZONE_RADIUS = 10000  # metres
 CIRCLING_RADIUS = 1000  # metres
@@ -34,12 +34,12 @@ def main():
     # spawn plane #1 (this is optional)
     atc.spawn_plane()
 
+    # loop every 0.1 seconds (10 Hz)
+    time_delta = 1 / TRANSMIT_RATE
+
     # prepare pygame
     screen, all_sprites = pygame_init(ZONE_RADIUS)
     plane_sprites, runway_sprites = all_sprites
-
-    # loop every 0.1 seconds (10 Hz)
-    time_delta = 1 / TRANSMIT_RATE
 
     # tracking variables for the GUI
     running = True
@@ -75,7 +75,7 @@ def main():
                 elif plane.close_to_runway_or_hold_point(atc.circling_points):
                     plane.status = HOLDING
                     atc.circling_points.append(plane.find_hold_point())
-                    
+
             elif plane.status == HOLDING:
                 if atc.status == AVAILABLE:
                     atc.circling_points.remove(plane.target_point)
@@ -116,6 +116,7 @@ def main():
         # visual simulation
         all_sprites = (plane_sprites, runway_sprites)
         # spawn a plane by pressing the space key
+        # quit by pressing the window close button
         add_plane, running = refresh_screen(screen, all_sprites, ZONE_RADIUS)
 
         time.sleep(time_delta)  # communicate with ATC at given rate
