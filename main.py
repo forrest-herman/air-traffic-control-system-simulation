@@ -1,7 +1,7 @@
 import math
 import time
 
-from models import ATC, prep_for_landing
+from models import ATC
 from simulation import refresh_screen, pygame_init, new_plane_sprite, new_runway_sprite
 
 from statuses import *  # import all plane and atc statuses
@@ -71,7 +71,7 @@ def main():
             # check for planes that are waiting to land
             if plane.status == FLYING:
                 if atc.status == AVAILABLE:
-                    prep_for_landing(free_runways, plane)
+                    plane.prep_for_landing(free_runways)
                 elif plane.close_to_runway_or_hold_point(atc.circling_points):
                     plane.status = HOLDING
                     atc.circling_points.append(plane.find_hold_point())
@@ -79,7 +79,7 @@ def main():
             elif plane.status == HOLDING:
                 if atc.status == AVAILABLE:
                     atc.circling_points.remove(plane.target_point)
-                    prep_for_landing(free_runways, plane)
+                    plane.prep_for_landing(free_runways)
 
             if plane.status == LANDING:
                 if math.hypot(plane.x - plane.target_point[0], plane.y - plane.target_point[1]) <= plane.runway.width * 1.5:

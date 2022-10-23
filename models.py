@@ -3,9 +3,6 @@ import random
 
 from statuses import *
 
-# Temp
-RETRIES = 20
-
 
 class Plane:
     def __init__(self, coords, speed, circling_radius):
@@ -14,9 +11,10 @@ class Plane:
         self.speed = speed
         self.circling_radius = circling_radius
         # direction towards the center of the circle in radians
+        # by default, planes spawn facing outwards, so this rotates them by 180 degrees
         direction = math.atan2(coords[1], coords[0]) + math.pi  # face plane inwards
         self.angle = direction  # in rad
-        self.status = FLYING
+        self.status = FLYING  # default plane status
         self.target_point = None  # if given a point to circle
         self.runway = None  # if given a runway to land on
 
@@ -41,29 +39,14 @@ class Plane:
             self.x += self.speed * math.cos(self.angle) * dt
             self.y += self.speed * math.sin(self.angle) * dt
 
-    def find_hold_point(self):
-        # find the point to circle around
-        angle = self.angle + math.pi  # get outward facing angle
-        self.target_point = (
-            self.x - self.circling_radius * math.cos(angle),
-            self.y - self.circling_radius * math.sin(angle)
-        )
-        return self.target_point
-
-    def close_to_runway_or_hold_point(self, occupied_pts):
-        # check if another plane is circling between plane and the runway
-        for point in occupied_pts:
-            distance_to_point = math.hypot(self.x - point[0], self.y - point[1])
-            if distance_to_point <= 4 * self.circling_radius:
-                print("Plane is too close to another plane")
-                return True
-        if math.hypot(self.x, self.y) <= 4 * self.circling_radius:
-            # this would need to be improved if the number of runways is increased
-            print("Plane is too close to a runway")
-            return True
-        return False
+    def update_path_to_point(self, point):
+        """ Takes a point as input and sets the plane's path to it """
+        self.target_point = point
+        adjusted_coords = (point[0] - self.x, point[1] - self.y)
+        self.angle = math.atan2(adjusted_coords[1], adjusted_coords[0])
 
     def set_path_to_runway(self, runway, target_top):
+        """ Sets the plane's path to the corresponding side of the runway """
         if(target_top):
             coords = runway.get_north_coords()
         else:
@@ -71,10 +54,71 @@ class Plane:
         self.runway = runway
         self.update_path_to_point(coords)
 
-    def update_path_to_point(self, point):
-        self.target_point = point
-        adjusted_coords = (point[0] - self.x, point[1] - self.y)
-        self.angle = math.atan2(adjusted_coords[1], adjusted_coords[0])
+    def find_hold_point(self):
+        """ Finds the ideal hold point for the current plane """
+        angle = self.angle + math.pi  # get outward facing angle
+        # track backwards to find the point to circle around
+        self.target_point = (
+            self.x - self.circling_radius * math.cos(angle),
+            self.y - self.circling_radius * math.sin(angle)
+        )
+        return self.target_point
+
+    def close_to_runway_or_hold_point(self, occupied_pts):
+        """ Checks if the plane is close to a runway or hold point """
+        # check if another plane is circling between plane and the runway
+        for point in occupied_pts:
+            distance_to_point = math.hypot(self.x - point[0], self.y - point[1])
+            if distance_to_point <= 4 * self.circling_radius:
+                print("Plane is too close to another plane")
+                return True
+        # check if the plane is close to an occupied runway
+        if math.hypot(self.x, self.y) <= 4 * self.circling_radius:
+            # this would need to be improved if the number of runways is increased
+            print("Plane is too close to a runway")
+            return True
+        return False
+
+    def prep_for_landing(self, free_runways):
+        """ Find closest runway to the plane and set the plane's path to it """
+        quadrant = self.get_quadrant()
+        # based on the quadrant, find the which side of the runway to land on
+        if quadrant == 1:
+            from_the_top = True
+            from_the_left = False
+        elif quadrant == 2:
+            from_the_top = True
+            from_the_left = True
+        elif quadrant == 3:
+            from_the_top = False
+            from_the_left = True
+        elif quadrant == 4:
+            from_the_top = False
+            from_the_left = False
+
+        length = len(free_runways)
+        if from_the_left:
+            # choose innermost available left runway
+            runway = free_runways[length//2-1]
+        else:
+            # choose innermost available right runway
+            runway = free_runways[length//2]
+
+        # set the plane to land
+        runway.status = BUSY
+        self.status = LANDING
+        self.set_path_to_runway(runway, from_the_top)
+
+    def get_quadrant(self):
+        """ Returns the quadrant the plane is in """
+        if self.x > 0 and self.y > 0:
+            return 1
+        elif self.x < 0 and self.y > 0:
+            return 2
+        elif self.x < 0 and self.y < 0:
+            return 3
+        elif self.x > 0 and self.y < 0:
+            return 4
 
 
 class Runway:
@@ -126,7 +170,7 @@ class ATC:
         self.place_runways(num_runways, runway_dimensions, runway_spacing)
 
         self.status = AVAILABLE
-        self.spawn_attemps = 0
+        self.failed_spawn_attemps = 0
 
     def __str__(self):
         return f"{self.name} ATC System".strip()
@@ -156,6 +200,7 @@ class ATC:
         return available_runways
 
     def update_planes(self, time_delta=None):
+        """ Updates the planes in the system to their next position """
         if time_delta is None:
             time_delta = self.time_delta
         for plane in self.planes:
@@ -176,88 +221,34 @@ class ATC:
             if check_collision(plane, new_plane, distance_factor):
                 del new_plane
                 print("Collision detected. Plane not spawned.")
-
-                # TODO: track attempts?
-                self.spawn_attemps += 1  # count number of unalowable positions
-                if self.spawn_attemps >= RETRIES:
-                    self.max_planes = len(self.planes)  # set max planes to current number of planes
-                    return False
-
+                # spawn position was too close to another plane, retry in a new position
                 print("Retrying...")
                 return self.spawn_plane()
 
+        # no collisions detected, plane is spawned
         print("Plane spawned.")
         self.planes.append(new_plane)
         return True
 
 
-# helper function for ATC class
+# helper functions for ATC class
+
 def create_plane(zone_radius, speed, circling_radius):
     # spawn plan at a random location on the edge of the zone
     rand_angle = random.uniform(0, 2*math.pi)  # get an angle inside the circle zone
 
     # create coordinates along perimeter of circle
     current_coords = (zone_radius*math.cos(rand_angle), zone_radius*math.sin(rand_angle))
+
     # create plane
     new_plane = Plane(current_coords, speed, circling_radius)
     return new_plane
 
 
 # checks
-def check_plane_status(planes, collision_distance):
-    # order the planes by x coordinate, then by y coordinate
-
-    for i, plane in enumerate(planes):
-        # check if plane is within 100m of another plane
-        if check_collision(planes[i], planes[i+1], planes[i].collision_distance):
-            return True
-
-
 def check_collision(plane1, plane2, collision_distance):
     distance = math.sqrt((plane1.x - plane2.x)**2 + (plane1.y - plane2.y)**2)
     if distance < collision_distance:
         print("Collision detected!")
         return True
     return False
-
-
-def prep_for_landing(free_runways, plane):
-    # find closest runway
-    quadrant = get_quadrant(plane)
-    if quadrant == 1:
-        from_the_top = True
-        from_the_left = False
-    elif quadrant == 2:
-        from_the_top = True
-        from_the_left = True
-    elif quadrant == 3:
-        from_the_top = False
-        from_the_left = True
-    elif quadrant == 4:
-        from_the_top = False
-        from_the_left = False
-
-    lenght = len(free_runways)
-    if from_the_left:
-        # choose innermost available left runway
-        runway = free_runways[lenght//2-1]
-    else:
-        # choose innermost available right runway
-        runway = free_runways[lenght//2]
-
-    # set the plane to land
-    runway.status = BUSY
-    plane.status = LANDING
-    # TODO: set target point to landing strip top or bottom
-    plane.set_path_to_runway(runway, from_the_top)
-
-
-def get_quadrant(plane):
-    if plane.x > 0 and plane.y > 0:
-        return 1
-    elif plane.x < 0 and plane.y > 0:
-        return 2
-    elif plane.x < 0 and plane.y < 0:
-        return 3
-    elif plane.x > 0 and plane.y < 0:
-        return 4
